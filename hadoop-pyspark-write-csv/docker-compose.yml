@@ -1,0 +1,53 @@
+version: "2"
+services:
+   namenode:
+      image: apache/hadoop:3
+      hostname: namenode
+      command: ["hdfs", "namenode"]
+      ports:
+        - 9870:9870
+        - 8020:8020
+      env_file:
+        - ./config
+      environment:
+          ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      networks:
+        - big_data_network
+   datanode:
+      image: apache/hadoop:3
+      command: ["hdfs", "datanode"]
+      env_file:
+        - ./config      
+      networks:
+        - big_data_network
+   resourcemanager:
+      image: apache/hadoop:3
+      hostname: resourcemanager
+      command: ["yarn", "resourcemanager"]
+      ports:
+         - 8088:8088
+      env_file:
+        - ./config
+      volumes:
+        - ./test.sh:/opt/test.sh
+      networks:
+        - big_data_network
+   nodemanager:
+      image: apache/hadoop:3
+      command: ["yarn", "nodemanager"]
+      env_file:
+        - ./config
+      networks:
+        - big_data_network
+   jupyter:
+      image: ollobergan/pyspark-jupyter
+      hostname: jupyter
+      ports:
+        - "12588:8888" 
+      volumes:
+        - ./notebooks:/home/jovyan/work  
+      networks:
+        - big_data_network
+networks:
+  big_data_network:
+    driver: bridge
